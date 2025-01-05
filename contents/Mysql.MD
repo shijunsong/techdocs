@@ -3,6 +3,8 @@
 ### 1. 架构 
 <image src="../pictures/mysql/mysql%20architecture.png" />
 
+![](../pictures/mysql/mysql%20architecture.png")
+
 ### 2.引擎 
 <image src="../pictures/mysql/mysql%20engines.png" />
 
