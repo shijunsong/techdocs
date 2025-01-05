@@ -1,10 +1,10 @@
 # Mysql
 
 ### 1. 架构 
-<image src="../pictures/mysql/mysql%20architecture.png" />
+<image src="../pictures/mysql/mysql%20architecture.png" width="50%"/>
 
 ### 2.引擎 
-<image src="../pictures/mysql/mysql%20engines.png" />
+<image src="../pictures/mysql/mysql%20engines.png" width="50%"/>
 
 #### 2.1 MyISAM  & InnoDB区别
 
