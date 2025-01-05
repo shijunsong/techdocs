@@ -113,7 +113,8 @@
 #### 5.0 基础概念
 
 > **事务概念和作用**：用于保证数据的一致性，事务是在数据库管理系统中执行的一个逻辑操作单元，要么都成功，要么都失败  
-> **版本链**：数据表的一行记录，所有的历史版本数据组成的链表  
+> **版本链**：数据表的一行记录，所有的历史版本数据组成的链表   
+> **row_id**：如果没有设置主键会默认设置int(6)大小的自增id作为主键，并生成聚簇索引  
 > **trx_id** (InnoDB 隐藏字段): 事务id（transaction id： InnoDB事务更新时生成），**该编号是严格按照递增顺序产生的**  
 > **roll_pointer** (InnoDB 隐藏字段)：指向上一事务版本指针（InnoDB事务更新时生成，insert时无版本记录）  
 > [**Consistent Read view**（一致性视图）](https://www.jianshu.com/p/56ad7ffc1886)  
@@ -121,7 +122,7 @@
 > > m_ids：生成ReadView时当前系统中活跃的所有事务的事务id列表  
 > > min_trx_id：生成ReadView时，m_ids中最小值  
 > > max_trx_id：生成ReadView时系统中应该分配给下一个事务的id值（m_ids最大 + 1）  
-> > creator_trx_id：生成该ReadView的事务的事务id  
+> > creator_trx_id：生成该ReadView的事务的事务id   
 
 #### 5.1 原子性(Atomicity)
 
@@ -129,10 +130,6 @@
 > **记录**：buffer pool 数据页修改前，记录到undolog buffer  
 > **删除**：事务提交后，通过后台purge线程进行回收  
 > **写入**：在数据修改前写入   
-> **应用**：[MVCC](#mvcc)。  
->
-> - `快照读：`读行数据被其他事务锁定时，可以从undo log中分析出该行记录以前的数据版本，让用户能够读取到历史数据快照。  
-> - `当前读：`使用间隙锁
 
 #### 5.2 持久性(Durability)
 
@@ -172,15 +169,14 @@
 >> 不能解决幻读的问题。原因是MVCC前提是数据存在，  
 >> 幻读发生在新增和删除时
 >
+>当前读 & 快照读
+>
 >|        | 实现方式                   | 应用                                                         |
 >| ------ | -------------------------- | ------------------------------------------------------------ |
 >| 当前读 | next-key lock & 间隙锁     | `SELECT ... LOCK IN SHARE MODE`<br />`SELECT ... FOR UPDATE`<br />`UPDATE ...`<br />`DELETE ...`<br />`INSERT ...` |
 >| 快照读 | Consisent Read View & MVCC |                                                              |
 >
->
->
->> 实现方式：
->> 应用：
+>`详细参考：`[详细MVCC讲解-InfoQ写作社区](https://xie.infoq.cn/article/f89d0688080319d7c6adad6e4)
 
 #### 5.5 <a id="un-re-do-log">UndoLog  & RedoLog 工作原理</a>
 
@@ -214,46 +210,52 @@
 
 #### 1. 性能优化
 
-1. 慢查询优化
+- 慢查询优化
 
-   > - 开启long_query_time、log-queries-not-using-indexs、show_query_log
-   > - 使用慢查询功能，获取查询时间较长的sql`show variables like "%slow_query%";`
-   > - 使用explain命令查询问题SQL执行计划
-   > - 使用show profiles查看问题sql的性能情况
-   > - 优化sql语句
+  > 开启long_query_time、log-queries-not-using-indexs、show_query_log
+  > 使用慢查询功能，获取查询时间较长的sql`show variables like "%slow_query%";`
+  > 使用explain命令查询问题SQL执行计划
+  > 使用show profiles查看问题sql的性能情况
+  > 优化sql语句
 
-2. join优化原则：
+- join优化原则：
 
-   > - 驱动表和小表，减少外层循环次数
-   > - 为匹配条件增加索引（减少内层表的循环匹配次数）
-   > - 增大join buffer size大小（一次缓存的数据越多，内层表的扫描次数越少）
-   > - 减少不必要的字段查询（字段越少， join buffer所缓存的数据就越多）
+  > 驱动表和小表，减少外层循环次数
+  > 为匹配条件增加索引（减少内层表的循环匹配次数）
+  > 增大join buffer size大小（一次缓存的数据越多，内层表的扫描次数越少）
+  > 减少不必要的字段查询（字段越少， join buffer所缓存的数据就越多）
 
-3. in优化：子查询中结果集较少，主查询数据比较大，并且有索引
+- in优化：
 
-4. exists优化：子查询结果较多，主查询数据少
+  > 子查询中结果集较少，主查询数据比较大，并且有索引
 
-5. order by优化：由max_length_for_sort_data参数决定，排序单条记录字段长度 <=， 用全字段排序，反之用rowID
+- exists优化：
 
-6. **索引优化：(空间换时间， 减少磁盘IO次数)**
+  > 子查询结果较多，主查询数据少
 
-   > 1. 使用联合索引进行索引覆盖，避免回表， 5.6 增加了**索引下推**优化
-   > 2. 查询中使用最左匹配走最左匹配
-   > 3. 联合索引创建原则：使用频繁，区分度高（筛选粒度大）
-   > 4. 不要在索引列上做任何计算
+- order by优化：
+
+  > 由max_length_for_sort_data参数决定，排序单条记录字段长度 <=， 用全字段排序，反之用rowID
+
+- **索引优化：(空间换时间， 减少磁盘IO次数)**
+
+  > 使用联合索引进行索引覆盖，避免回表， 5.6 增加了**索引下推**优化
+  > 查询中使用最左匹配走最左匹配
+  > 联合索引创建原则：使用频繁，区分度高（筛选粒度大）
+  > 不要在索引列上做任何计算
 
 #### 2.  查询Mysql使用经验
 
-1. [explain](https://dev.mysql.com/doc/refman/8.0/en/explain-output.html)命令
+[explain](https://dev.mysql.com/doc/refman/8.0/en/explain-output.html)命令
 
-   | 参数 | 含义                       |
-   |----| -------------------------- |
-   | id  | 表的读取顺序               |
-   | select_type | 数据读取操作的操作类型 |
-   | possible_keys | 哪些索引可以使用 |
-   | key | 哪些索引被实际使用         |
-   | ref | 表之间的引用               |
-   | rows | 每张表有多少行被优化器查询 |
+| 参数 | 含义                       |
+|----| -------------------------- |
+| id  | 表的读取顺序               |
+| select_type | 数据读取操作的操作类型 |
+| possible_keys | 哪些索引可以使用 |
+| key | 哪些索引被实际使用         |
+| ref | 表之间的引用               |
+| rows | 每张表有多少行被优化器查询 |
 
 ### 面试题
 
