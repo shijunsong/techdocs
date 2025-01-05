@@ -188,9 +188,8 @@
 
 >原理：
 >
->> 通过**Read View**和**Undo Log版本链及链元素中两个隐藏列（trx_id 和 roll_pointer）**比对，  
->> 如果不满足可见行，就会顺着 undo log 版本链里找到满足其可见性的记录，  
->> 从而控制并发事务访问同一个记录时的行为。  
+>> 通过**Read View**和**Undo Log版本链**及**链元素中两个隐藏列**（trx_id 和 roll_pointer）比对，  
+>> 如果不满足可见行，就会顺着 undo log 版本链里找到满足其可见性的记录，  从而控制并发事务访问同一个记录时的行为。  
 >
 >优点：
 >
@@ -204,17 +203,16 @@
 >
 >当前读 & 快照读
 >
->|                                    |                                        |                                                              |
+>|                                    | 实现原理                               | 应用                                                         |
 >| ---------------------------------- | -------------------------------------- | ------------------------------------------------------------ |
 >| 快照读/<br />普通度/<br />一致性读 | Consisent Read View & MVCC             | 普通不加锁的select                                           |
 >| 当前读/<br />锁定读                | 读到的数据（索引记录）加共享锁或排他锁 | select ... lock in share mode;  <br />select ... for update;  <br />insert; <br />update; <br />delete; |
 >|                                    |                                        |                                                              |
 >
->`详细参考：`[详细MVCC讲解-InfoQ写作社区](https://xie.infoq.cn/article/f89d0688080319d7c6adad6e4)
 
 #### 5.5 <a id="un-re-do-log">UndoLog  & RedoLog 工作原理</a>
 
-![](https://i-blog.csdnimg.cn/blog_migrate/0fc1a1798d2860a16aeef31d03f0268c.png)
+<image src="../pictures/mysql/undo redo log process.png" width="70%"/>
 
 **Undo Log（回滚日志）**
 
