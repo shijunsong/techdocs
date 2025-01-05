@@ -212,7 +212,7 @@
 
 #### 5.5 <a id="un-re-do-log">UndoLog  & RedoLog 工作原理</a>
 
-<image src="../pictures/mysql/undo redo log process.png" width="70%"/>
+<image src="../pictures/mysql/undo redo log process.png" width="40%"/>
 
 **Undo Log（回滚日志）**
 
