@@ -95,23 +95,17 @@
 | 分类 | 锁名称 | 锁名称          | 乐观 | 悲观 |                                                              |
 | ---- | ------ | --------------- | ---- | ---- | ------------------------------------------------------------ |
 | 粒度 | 表锁   | 意向锁(`IX/IS`) |      |      |                                                              |
-|      |        | 共享锁(`S`)     | √    |      | `SELECT ID FROM USER WHERE uid = '1' LOCK IN SHARE MODE;`<br />`lock table tab_name read; (不允许使用)` |
-|      |        | 排他锁(`X`)     |      | √    | `SELECT ID FROM USER WHERE uid = '1' FOR UPDATE;`<br />`lock table tab_name write; (不允许使用)` |
+|      |        | 共享锁(`S`)     | √    |      | `lock table tab_name read; (不允许使用)`                     |
+|      |        | 排他锁(`X`)     |      | √    | `SELECT ... where id = '1' for update`<br />`lock table tab_name write; (不允许使用)` |
 |      |        | 元数据锁        |      |      |                                                              |
 |      |        | AUTO-INC        |      |      |                                                              |
-|      | 行锁   | 间隙锁          |      |      |                                                              |
-|      |        |                 |      |      |                                                              |
-|      |        |                 |      |      |                                                              |
-|      |        |                 |      |      |                                                              |
-|      |        |                 |      |      |                                                              |
-|      |        |                 |      |      |                                                              |
-|      |        |                 |      |      |                                                              |
-|      |        |                 |      |      |                                                              |
+|      | 行锁   | S / X           |      |      | `select id from where id = 1; (索引生效是行锁，否则表锁)`<br />`SELECT ... where id = '1' LOCK IN SHARE MODE;` |
+|      | 间隙锁 |                 |      |      | `SELECT ... where id = '1' for update;`<br />解析：update 过程中会加 **行锁和 间隙锁** 对索引前后上锁，防止插入数据<br />`select ... where id > 10;`<br />解析：id大于10为间隙锁范围，防止插入数据 |
 
 > 表锁：加锁前需要检查所有行无S 或 X Lock  
-> 行锁：select ... where id 使用到索引时是行锁， 否则表锁  
 > 意向锁：意义是**防止遍历**  
-> 元数据锁：表DDL时，进行insert、update、delete操作阻塞
+> 元数据锁：表DDL时，进行insert、update、delete操作阻塞  
+> 间隙锁：解决并发事务**新增或删除**数据导致的 幻读问题
 
 
 
@@ -139,21 +133,26 @@
 > 是否锁表：`SHOW OPEN TABLES where In_use > 0;`  
 > 查看最近死锁的日志：`show engine innodb status;`  
 
-### 5. 事务
+### 5. [事务](https://cloud.tencent.com/developer/article/2329939)
 
 #### 5.0 基础概念
 
 > **事务概念和作用**：用于保证数据的一致性，事务是在数据库管理系统中执行的一个逻辑操作单元，要么都成功，要么都失败  
 > **版本链**：数据表的一行记录，所有的历史版本数据组成的链表   
-> **row_id**：如果没有设置主键会默认设置int(6)大小的自增id作为主键，并生成聚簇索引  
-> **trx_id** (InnoDB 隐藏字段): 事务id（transaction id： InnoDB事务更新时生成），**该编号是严格按照递增顺序产生的**  
-> **roll_pointer** (InnoDB 隐藏字段)：指向上一事务版本指针（InnoDB事务更新时生成，insert时无版本记录）  
+> **db_row_id**：6byte，隐含的自增ID（隐藏主键），如果数据表没有主键，InnoDB会自动以DB_ROW_ID生成一个聚簇索引。  
+> **db_trx_id** : 6byte，事务id（transaction id： InnoDB事务更新时生成），**该编号是严格按照递增顺序产生的**  
+> **db_roll_pointer**：7byte, 指向上一事务版本指针（InnoDB事务更新时生成，insert时无版本记录）  
 > [**Consistent Read view**（一致性视图）](https://www.jianshu.com/p/56ad7ffc1886)  
 >
 > > m_ids：生成ReadView时当前系统中活跃的所有事务的事务id列表  
 > > min_trx_id：生成ReadView时，m_ids中最小值  
 > > max_trx_id：生成ReadView时系统中应该分配给下一个事务的id值（m_ids最大 + 1）  
 > > creator_trx_id：生成该ReadView的事务的事务id   
+
+#### 5.0 事务分类
+
+> 隐式事务：insert、update、delete  
+> 显式事务：autocommit=off，手动BEGIN、COMMIT和ROLLBACK语句来控制事务的执行
 
 #### 5.1 原子性(Atomicity)
 
@@ -171,22 +170,25 @@
 
 #### 5.3 隔离性(Isolation)
 
-> **RC && RR 隔离级别实现**: [MVCC机制](#mvcc)
+> **解决的问题**：多事务并发问题
+> **RC && RR 隔离级别实现**: [MVCC机制](#mvcc) + 读写锁
 
-| 隔离级别                       | 脏读 | 不可重复读 | 幻读                        |                                       |
-| ------------------------------ | ---- | ---------- | --------------------------- | ------------------------------------- |
-| 读未提交(RU, Read uncommitted) | √    | √          | √                           |                                       |
-| 读已提交(RC, Read committed）  | ×    | √          | √`(通过mvcc)`               | 每个select<br />创建新Read View       |
-| 可重复读(RR, Repeatable read） | ×    | ×          | √ `(通过mvcc & 间隙锁解决)` | 只在启动事务时<br />生成一个Read View |
-| 串行化（Serializable）         | ×    | ×          | × `(读数据行加读写锁)`      |                                       |
+| 隔离级别                       | 脏读 | 不可重复读 | 幻读                             |                                           |
+| ------------------------------ | ---- | ---------- | -------------------------------- | ----------------------------------------- |
+| 读未提交(RU, Read uncommitted) | √    | √          | √                                |                                           |
+| 读已提交(RC, Read committed）  | ×    | √          | √`(通过mvcc)`                    | 每次select<br />创建新Read View           |
+| 可重复读(RR, Repeatable read） | ×    | ×          | √ `(通过mvcc & 行锁+间隙锁解决)` | 事务第一次select时<br />生成一个Read View |
+| 串行化（Serializable）         | ×    | ×          | × `(读数据行加读写锁)`           |                                           |
 
 #### 5.4 一致性(Consistency)
+
+>  通过持久性+原子性+隔离性来保证
 
 #### 5.5 <a id ="mvcc">MVCC（多版本并发控制）</a>
 
 >原理：
 >
->> 通过**Read View**和**Undo Log版本链元素中两个隐藏列（trx_id 和 roll_pointer）**比对，  
+>> 通过**Read View**和**Undo Log版本链及链元素中两个隐藏列（trx_id 和 roll_pointer）**比对，  
 >> 如果不满足可见行，就会顺着 undo log 版本链里找到满足其可见性的记录，  
 >> 从而控制并发事务访问同一个记录时的行为。  
 >
@@ -202,10 +204,11 @@
 >
 >当前读 & 快照读
 >
->|        | 实现方式                   | 应用                                                         |
->| ------ | -------------------------- | ------------------------------------------------------------ |
->| 当前读 | next-key lock & 间隙锁     | `SELECT ... LOCK IN SHARE MODE`<br />`SELECT ... FOR UPDATE`<br />`UPDATE ...`<br />`DELETE ...`<br />`INSERT ...` |
->| 快照读 | Consisent Read View & MVCC |                                                              |
+>|                                    |                                        |                                                              |
+>| ---------------------------------- | -------------------------------------- | ------------------------------------------------------------ |
+>| 快照读/<br />普通度/<br />一致性读 | Consisent Read View & MVCC             | 普通不加锁的select                                           |
+>| 当前读/<br />锁定读                | 读到的数据（索引记录）加共享锁或排他锁 | select ... lock in share mode;  <br />select ... for update;  <br />insert; <br />update; <br />delete; |
+>|                                    |                                        |                                                              |
 >
 >`详细参考：`[详细MVCC讲解-InfoQ写作社区](https://xie.infoq.cn/article/f89d0688080319d7c6adad6e4)
 
@@ -213,21 +216,29 @@
 
 ![](https://i-blog.csdnimg.cn/blog_migrate/0fc1a1798d2860a16aeef31d03f0268c.png)
 
-Undolog
+**Undo Log（回滚日志）**
 
 - 原理：
 
   > 记录一行数据每一次更新操作产生的一个 roll_pointer 指针和一个 trx_id 事务id  
   > 变更数据格式：`|DB_ROW_ID|DB_TRX_IDS|DB_ROLL_POINTER|变更行记录|`
 
-- 记录过程：提交log buffer >  修改io同步
+- 记录过程：添加log buffer记录， redolog落盘前进行刷盘
 
 - 作用
 
   > **实现事务回滚，保障事务的原子性**  
   > **实现 MVCC（多版本并发控制）关键因素之一**
 
+**Redo Log（重做日志）**
+
+
+
 #### 5.6 UndoLog  & RedoLog & BinLog 区别
+
+
+
+
 
 ### 6. 基础使用
 
@@ -275,7 +286,7 @@ Undolog
 
 #### 2.  查询Mysql使用经验
 
-[explain](https://dev.mysql.com/doc/refman/8.0/en/explain-output.html)命令
+- [explain](https://dev.mysql.com/doc/refman/8.0/en/explain-output.html)命令
 
 | 参数 | 含义                       |
 |----| -------------------------- |
@@ -285,6 +296,10 @@ Undolog
 | key | 哪些索引被实际使用         |
 | ref | 表之间的引用               |
 | rows | 每张表有多少行被优化器查询 |
+
+- 锁内容查询
+
+  `select * from performance_schema.data_locks\G;`
 
 ### 面试题
 
@@ -308,3 +323,10 @@ Undolog
    > - 查询条件是字符串使用 != 或 <>可能会不走： `id != 条件会走`
    > - 查询条件使用not in时，普通索引索引失效：`如果是主键则走索引`
    > - order by 或 limit 未索引覆盖时可能会失效：`索引覆盖可以走`
+
+5. 都有哪些情况会产生死锁？
+
+   > - [出现死锁的间隙锁](https://blog.csdn.net/tianya_lu/article/details/112562018)：  
+   >   现象：高并发下，系统老是出现insert死锁 ，主要集中在同一个事务中先delete 后 insert的情况下  
+   >   原因：数据量比较大的情况下，扫描索引发现数据不存在，delete则会获取间隙锁，以该条数据为界向左或向右构建区间并锁住数据。
+   >   解决办法：修改取消间隙锁参数=true 或者 修改代码逻辑尽量不去删除不存在的记录
