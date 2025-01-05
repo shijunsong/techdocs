@@ -1,8 +1,10 @@
 # Mysql
 
-### 1. [架构](../pictures/mysql/mysql%20architecture.png)
+### 1. 架构 
+<image src="../pictures/mysql/mysql%20architecture.png" />
 
-### 2. [引擎](../pictures/mysql/mysql%20engines.png)
+### 2.引擎 
+<image src="../pictures/mysql/mysql%20engines.png" />
 
 #### 2.1 MyISAM  & InnoDB区别
 
@@ -37,11 +39,11 @@
 
 > **分类维度：**
 >
-> 按数据结构分类：B+Tree、Hash、Full-Text、R-Tree
-> 按功能分类：主键索引、唯一索引、普通索引、全文索引、组合索引
-> 按存储方式分类：聚簇索引、非聚簇索引（辅助索引）
-> 按覆盖范围分类：覆盖索引、非覆盖索引
-> 按索引列数量分：单列索引、多列索引
+> 按数据结构分类：B+Tree、Hash、Full-Text、R-Tree  
+> 按功能分类：主键索引、唯一索引、普通索引、全文索引、组合索引  
+> 按存储方式分类：聚簇索引、非聚簇索引（辅助索引）  
+> 按覆盖范围分类：覆盖索引、非覆盖索引  
+> 按索引列数量分：单列索引、多列索引  
 
 
 
@@ -100,44 +102,44 @@
 
 #### <a id="trans_selects">4.2 查询</a>
 
-> 正在进行中的事务：`SELECT * FROM information_schema.INNODB_TRX;`
-> 正在锁的事务： `SELECT * FROM INFORMATION_SCHEMA.INNODB_LOCKS;`
-> 等待锁的事务：`SELECT * FROM INFORMATION_SCHEMA.INNODB_LOCK_WAITS;`
-> 是否锁表：`SHOW OPEN TABLES where In_use > 0;`
-> 查看最近死锁的日志：`show engine innodb status;`
+> 正在进行中的事务：`SELECT * FROM information_schema.INNODB_TRX;`  
+> 正在锁的事务： `SELECT * FROM INFORMATION_SCHEMA.INNODB_LOCKS;`  
+> 等待锁的事务：`SELECT * FROM INFORMATION_SCHEMA.INNODB_LOCK_WAITS;`  
+> 是否锁表：`SHOW OPEN TABLES where In_use > 0;`  
+> 查看最近死锁的日志：`show engine innodb status;`  
 
 ### 5. 事务
 
 #### 5.0 基础概念
 
-> **事务概念和作用**：用于保证数据的一致性，事务是在数据库管理系统中执行的一个逻辑操作单元，要么都成功，要么都失败
-> **版本链**：数据表的一行记录，所有的历史版本数据组成的链表
-> **trx_id** (InnoDB 隐藏字段): 事务id（transaction id： InnoDB事务更新时生成），**该编号是严格按照递增顺序产生的**
-> **roll_pointer** (InnoDB 隐藏字段)：指向上一事务版本指针（InnoDB事务更新时生成，insert时无版本记录）
-> [**Consistent Read view**（一致性视图）](https://www.jianshu.com/p/56ad7ffc1886)
+> **事务概念和作用**：用于保证数据的一致性，事务是在数据库管理系统中执行的一个逻辑操作单元，要么都成功，要么都失败  
+> **版本链**：数据表的一行记录，所有的历史版本数据组成的链表  
+> **trx_id** (InnoDB 隐藏字段): 事务id（transaction id： InnoDB事务更新时生成），**该编号是严格按照递增顺序产生的**  
+> **roll_pointer** (InnoDB 隐藏字段)：指向上一事务版本指针（InnoDB事务更新时生成，insert时无版本记录）  
+> [**Consistent Read view**（一致性视图）](https://www.jianshu.com/p/56ad7ffc1886)  
 >
-> > m_ids：生成ReadView时当前系统中活跃的所有事务的事务id列表
-> > min_trx_id：生成ReadView时，m_ids中最小值
-> > max_trx_id：生成ReadView时系统中应该分配给下一个事务的id值（m_ids最大 + 1）
-> > creator_trx_id：生成该ReadView的事务的事务id
+> > m_ids：生成ReadView时当前系统中活跃的所有事务的事务id列表  
+> > min_trx_id：生成ReadView时，m_ids中最小值  
+> > max_trx_id：生成ReadView时系统中应该分配给下一个事务的id值（m_ids最大 + 1）  
+> > creator_trx_id：生成该ReadView的事务的事务id  
 
 #### 5.1 原子性(Atomicity)
 
-> 原理：通过[**Undo log**](#un-re-do-log)记录事务恢复SQL，保证原子性。
-> **记录**：buffer pool 数据页修改前，记录到undolog buffer
-> **删除**：事务提交后，通过后台purge线程进行回收
-> **写入**：在数据修改前写入
-> **应用**：[MVCC](#mvcc)。
+> 原理：通过[**Undo log**](#un-re-do-log)记录事务恢复SQL，保证原子性。  
+> **记录**：buffer pool 数据页修改前，记录到undolog buffer  
+> **删除**：事务提交后，通过后台purge线程进行回收  
+> **写入**：在数据修改前写入   
+> **应用**：[MVCC](#mvcc)。  
 >
-> - `快照读：`读行数据被其他事务锁定时，可以从undo log中分析出该行记录以前的数据版本，让用户能够读取到历史数据快照。
+> - `快照读：`读行数据被其他事务锁定时，可以从undo log中分析出该行记录以前的数据版本，让用户能够读取到历史数据快照。  
 > - `当前读：`使用间隙锁
 
 #### 5.2 持久性(Durability)
 
-> 原理：通过[**Redo log**](#un-re-do-log)记录事务执行过程中的修改情况，保证持久性。
-> **记录**：buffer pool 数据页变更结束后，相应修改记录到redolog buffer
-> **删除**：由后台purge线程进行回收
-> **写入**：事务提交时写入（也有可能[提交前写入](https://cloud.tencent.com/developer/article/1945809)）
+> 原理：通过[**Redo log**](#un-re-do-log)记录事务执行过程中的修改情况，保证持久性。  
+> **记录**：buffer pool 数据页变更结束后，相应修改记录到redolog buffer  
+> **删除**：由后台purge线程进行回收  
+> **写入**：事务提交时写入（也有可能[提交前写入](https://cloud.tencent.com/developer/article/1945809)）  
 
 #### 5.3 隔离性(Isolation)
 
@@ -154,45 +156,45 @@
 
 #### 5.5 <a id ="mvcc">MVCC（多版本并发控制）</a>
 
-> 原理：
+>原理：
 >
-> > 通过**Read View**和**Undo Log版本链元素中两个隐藏列（trx_id 和 roll_pointer）**比对，
-> > 如果不满足可见行，就会顺着 undo log 版本链里找到满足其可见性的记录，
-> > 从而控制并发事务访问同一个记录时的行为。
+>> 通过**Read View**和**Undo Log版本链元素中两个隐藏列（trx_id 和 roll_pointer）**比对，  
+>> 如果不满足可见行，就会顺着 undo log 版本链里找到满足其可见性的记录，  
+>> 从而控制并发事务访问同一个记录时的行为。  
 >
-> 优点：
+>优点：
 >
-> > 读写互不阻塞，提高并发性能
-> > 降低死锁风险
+>> 读写互不阻塞，提高并发性能  
+>> 降低死锁风险
 >
-> 缺点:
+>缺点:
 >
-> > 不能解决幻读的问题。原因是MVCC前提是数据存在，
-> > 幻读发生在新增和删除时
+>> 不能解决幻读的问题。原因是MVCC前提是数据存在，  
+>> 幻读发生在新增和删除时
 >
-> |        | 实现方式                   | 应用                                                         |
-> | ------ | -------------------------- | ------------------------------------------------------------ |
-> | 当前读 | next-key lock & 间隙锁     | `SELECT ... LOCK IN SHARE MODE`<br />`SELECT ... FOR UPDATE`<br />`UPDATE ...`<br />`DELETE ...`<br />`INSERT ...` |
-> | 快照读 | Consisent Read View & MVCC |                                                              |
+>|        | 实现方式                   | 应用                                                         |
+>| ------ | -------------------------- | ------------------------------------------------------------ |
+>| 当前读 | next-key lock & 间隙锁     | `SELECT ... LOCK IN SHARE MODE`<br />`SELECT ... FOR UPDATE`<br />`UPDATE ...`<br />`DELETE ...`<br />`INSERT ...` |
+>| 快照读 | Consisent Read View & MVCC |                                                              |
 >
 >
 >
-> > 实现方式：
-> > 应用：
+>> 实现方式：
+>> 应用：
 
 #### 5.5 <a id="un-re-do-log">UndoLog  & RedoLog 工作原理</a>
 
 > 1. Undolog作用:
-     >
-     >    原理：
-     >
-     >    > 记录一行数据每一次更新操作产生的一个 roll_pointer 指针和一个 trx_id 事务id
-     >    > 变更数据格式：`|变更行记录|trx_is|roll_pointer|`
-     >
-     >    作用
-     >
-     >    > **实现事务回滚，保障事务的原子性**
-     >    > **实现 MVCC（多版本并发控制）关键因素之一**
+>
+>原理：
+> 
+>> 记录一行数据每一次更新操作产生的一个 roll_pointer 指针和一个 trx_id 事务id  
+>> 变更数据格式：`|变更行记录|trx_is|roll_pointer|`
+>
+>作用
+>
+>> **实现事务回滚，保障事务的原子性**  
+>> **实现 MVCC（多版本并发控制）关键因素之一**
 >
 > 2. 事务提交前将log buffer中数据刷新到磁盘
 >
@@ -242,16 +244,16 @@
 
 #### 2.  查询Mysql使用经验
 
-1. explain+查询语句，查询sql是否走索引
+1. [explain](https://dev.mysql.com/doc/refman/8.0/en/explain-output.html)命令
 
-   | 参数 | 含义                       |      |
-      | ---- | -------------------------- | ---- |
-   |      | 表的读取顺序               |      |
-   |      | 数据读取操作的操作类型     |      |
-   |      | 哪些索引可以使用           |      |
-   |      | 哪些索引被实际使用         |      |
-   |      | 表之间的引用               |      |
-   |      | 每张表有多少行被优化器查询 |      |
+   | 参数 | 含义                       |
+   |----| -------------------------- |
+   | id  | 表的读取顺序               |
+   | select_type | 数据读取操作的操作类型 |
+   | possible_keys | 哪些索引可以使用 |
+   | key | 哪些索引被实际使用         |
+   | ref | 表之间的引用               |
+   | rows | 每张表有多少行被优化器查询 |
 
 ### 面试题
 
