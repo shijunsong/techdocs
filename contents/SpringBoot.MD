@@ -6,6 +6,20 @@
 @RestController、@Service、@Repository、@RequestMapping、@ResponseBody、@Value、@PathVariable  
 @ControllerAdvice、@Profiles、@ExceptionHandler、@Async、@ConfigurationProperties
 
+### Spring MVC 工作流程
+
+- Spring MVC 核心组件：
+  - DispatcherServlet：前端控制器，Spring MVC 的核心。接收所有的请求并分发给相应的处理器。
+  - HandlerMapping：处理器映射器，负责根据请求的 URL 查找对应的处理器。
+  - HandlerAdapter：处理器适配器，负责调用 Controller 中的具体方法。
+  - Controller：控制器，处理具体的用户请求。一个 Controller 通常对应于一个或多个 URL。
+  - ViewResolver：视图解析器，根据 ModelAndView 中的视图名解析出具体的 View。
+  - View：视图，负责渲染返回给用户的页面。
+
+- MVC流程：
+
+<img src="../pictures/spring/mvc process.png" width="90%"/>
+
 ### IOC & AOP
 
 IOC（Inversion of Control，控制反转）
@@ -68,7 +82,7 @@ AOP （Aspect Oriented Programming，面向切面编程）
   >
   > 2、**设置对象属性**(依赖注入)：BeanDefinition找到对象依赖的其他对象，并赋予当前对象。
   >
-  > > - 构造函数选择：
+  > > - 构造函数选择：(推断机制)
   > >
   > >   > 如果一个类**只有一个构造方法**，那没的选择，只能用这个构造方法  
   > >   > 如果一个类有**多个构造方法**，首**先**会判断是否有**@Autowired指定**构造方法，**再**看是否有**无参构造**方法。如果**都没有就会报错** No default constructor found
