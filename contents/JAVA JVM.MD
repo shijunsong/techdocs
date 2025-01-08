@@ -8,7 +8,7 @@
 
 <img src="../pictures/java/compute memory model.png" width="80%"/>
 
-### 2. JAVA模型图
+### 2. JAVA内存模型
 
 <img src="../pictures/java/java memory model.png" width="80%" />
 
@@ -27,15 +27,11 @@
 
 
 
-# JVM运行时内存模型
+# [JVM运行时内存模型](https://developer.aliyun.com/article/1449769)
 
-**`全称：Java Virtual Machine`**
+###  JDK7
 
-
-
-###  JDK7  
-
-
+<img src="../pictures/java/jvm .png" width="60%"/>
 
 ###  JDK8
 
