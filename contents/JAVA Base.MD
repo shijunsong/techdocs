@@ -73,9 +73,8 @@
 >   深拷贝出来的对象，内部的类执行指向的不是同一个对象
 
 ### 3. 泛型 extends 和 super 区别
-
-<? extends T> 类T的任何子类  
-<? super T> 类T的任何父类
+- `<? extends T>` 类T的任何子类  
+- `<? super T>` 类T的任何父类
 
 ### 4. 重写 和 重载 区别
 
@@ -172,16 +171,6 @@ public @interface Demo{
 ### 1.体系结构图
 
 <img src="../pictures/java/java execption struct.png" alt="img" style="zoom:70%;" />
-
-总结：
-
-Throwable  
-
-- error
-
-  
-
-- exception
 
 ### 2. 分类
 
