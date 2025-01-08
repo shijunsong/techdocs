@@ -32,7 +32,7 @@
 
 ### 锁升级原理
 
-<img src="../pictures/java/lock upgrade.png"/>
+<img src="../pictures/java/lock upgrade.png" alt="img" style="zoom:70%;" />
 
 # 面试题
 
@@ -94,7 +94,7 @@ public class MyService{
 
 # 2. 锁概念
 
-![img](https://picx.zhimg.com/v2-f51a9f072bf5a8054fa78acdb15126cb_1440w.jpg)
+<img src="https://picx.zhimg.com/v2-f51a9f072bf5a8054fa78acdb15126cb_1440w.jpg" alt="img" style="zoom:70%;" />
 
 | 应用名称               | 乐观/悲观锁 | 自旋锁 | 可重入锁 | 读/写锁 | 公平/非公平锁 | 共享/独占锁        | 重量/轻量 | 偏向锁 | 分段锁 | 互斥/同步 |
 | ---------------------- | ----------- | ------ | -------- | ------- | ------------- | ------------------ | --------- | ------ | ------ | --------- |

@@ -1,10 +1,10 @@
 # Mysql
 
 ### 1. 架构 
-<img src="../pictures/mysql/mysql%20architecture.png" width="60%;" />
+<img src="../pictures/mysql/mysql%20architecture.png" alt="img" style="zoom:70%;" />
 
 ### 2.引擎 
-<img src="../pictures/mysql/mysql%20engines.png" width="60%"/>
+<img src="../pictures/mysql/mysql%20engines.png" alt="img" style="zoom:70%;"/>
 
 #### 2.1 MyISAM  & InnoDB区别
 
@@ -356,7 +356,7 @@
 
   - 实现原理
 
-    <img src="https://ask.qcloudimg.com/http-save/yehe-1651099/k18oryhej5.png" width="50%"/>
+    <img src="https://ask.qcloudimg.com/http-save/yehe-1651099/k18oryhej5.png" alt="img" style="zoom:70%;"/>
 
   - 适用场景：读多写少，并且不存并发写的场景
 

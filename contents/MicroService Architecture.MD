@@ -103,7 +103,7 @@
 
 - MVC架构：领域优先的四层架构
 
-  <img src="../pictures/microservice/ddd.png"/>
+  <img src="../pictures/microservice/ddd.png" alt="img" style="zoom:70%;"/>
 
   大泥团： 不利于微服务的拆分。大泥团结构拆分出来的微服务依然是泥团机构，
   当服务业务逐渐复杂，这个泥团又会膨胀成为大泥团。

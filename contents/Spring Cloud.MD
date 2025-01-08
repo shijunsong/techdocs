@@ -83,10 +83,10 @@ ZoneAvoidanceRule区域内可用性能最优
 
   > Feign、Eureka、Hytrix、zuul、gateway、Ribbon、zipkin、seluth
 
-![1616047848976](F:/java面试题/2024年面试题大全/面试题笔记/面试题笔记/1616047848976.png)
+<img src="../pictures/microservice/springcloud.png" alt="img"/>
 
 - **SpringCloud Alibaba**
 
   > Nacos、Dubbo、Sentinal、RocketMQ、Seata
-
-![1616048190948](F:/java面试题/2024年面试题大全/面试题笔记/面试题笔记/1616048190948.png)
+  
+  <img src="../pictures/microservice/springcloud alibaba.png" alt="img" />

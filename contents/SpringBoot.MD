@@ -18,7 +18,7 @@
 
 - MVC流程：
 
-<img src="../pictures/spring/mvc process.png" width="90%"/>
+<img src="../pictures/spring/mvc process.png" alt="img" style="zoom:70%;"/>
 
 ### IOC & AOP
 

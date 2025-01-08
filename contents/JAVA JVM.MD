@@ -6,15 +6,15 @@
 
 ### 1. 系统内存模型图
 
-<img src="../pictures/java/compute memory model.png" width="80%"/>
+<img src="../pictures/java/compute memory model.png" alt="img" style="zoom:70%;" />
 
 ### 2. JAVA内存模型
 
-<img src="../pictures/java/java memory model.png" width="80%" />
+<img src="../pictures/java/java memory model.png" alt="img" style="zoom:70%;" />
 
 ### 3. 八大原子操作
 
-<img src="../pictures/java/jmm.png" width="60%"/>
+<img src="../pictures/java/jmm.png" alt="img" style="zoom:70%;"/>
 
 > lock（锁定）：作用于**主内存的变量**，把一个变量标识为线程独占状态。
 > unlock（解锁）：作用于**主内存的变量**，它把一个处于锁定状态的变量释放出来，释放后的变量才可以被其他线程锁定。
@@ -31,7 +31,7 @@
 
 ###  JDK7
 
-<img src="../pictures/java/jvm .png" width="60%"/>
+<img src="../pictures/java/jvm .png" alt="img" style="zoom:70%;"/>
 
 ###  JDK8
 

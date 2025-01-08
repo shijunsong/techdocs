@@ -25,7 +25,7 @@
   
   - 过程
   
-  <img src="../pictures/architecture/tcp three hands.png" width="80%"/>
+  <img src="../pictures/architecture/tcp three hands.png" alt="img" style="zoom:70%;"/>
   
   - 漏洞：
   
@@ -61,7 +61,7 @@
 
 #### 1. 架构
 
-<img src="../pictures/architecture/rpc.png" width="90%"/>
+<img src="../pictures/architecture/rpc.png" alt="img" style="zoom:70%;"/>
 
 - 调用模块-代理
 - 序列化
@@ -70,13 +70,13 @@
 
 #### 2. 调用过程
 
-<img src="../pictures/architecture/rpc process.png" width="50%"/>
+<img src="../pictures/architecture/rpc process.png" alt="img" style="zoom:70%;"/>
 
 ### Socket
 
 - 通信流程
 
-  <img src="../pictures/architecture/socket process.jpg" width="50%"/>
+  <img src="../pictures/architecture/socket process.jpg" alt="img" style="zoom:70%;"/>
 
 - 
 
@@ -114,7 +114,7 @@
 
   > 会根据channel上发生的读写事件，将请求交由某个空闲的线程处理。selector对应一个或者多个线程。
 
-<img src="../pictures/java/java nio.png" width="80%"/>
+<img src="../pictures/java/java nio.png" alt="img" style="zoom:70%;"/>
 
 ### IO 多路复用
 

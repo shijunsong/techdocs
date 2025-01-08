@@ -2,7 +2,7 @@
 
 # 架构
 
-<img src="https://kubernetes.io/images/docs/kubernetes-cluster-architecture.svg" width="70%"/>
+<img src="https://kubernetes.io/images/docs/kubernetes-cluster-architecture.svg" alt="img" style="zoom:70%;"/>
 
 # 核心组件
 

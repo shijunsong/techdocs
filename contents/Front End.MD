@@ -1,6 +1,6 @@
 # 生命周期
 
-<img src="https://v2.cn.vuejs.org/images/lifecycle.png" width="50%"/>
+<img src="https://v2.cn.vuejs.org/images/lifecycle.png" alt="img" style="zoom:50%;" />
 
 ### 1. 四大生命周期，八大钩子
 
