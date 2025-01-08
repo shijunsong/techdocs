@@ -91,7 +91,7 @@
   返回值范围小于父类，抛出异常范围小于等于父类，访问修饰符范围大于等于父类  
   如果父类方法访问修饰符为private子类则不能重写  
 
-### 5. JDK，JRE，JVM区别
+### 5. JDK,JRE,JVM区别
 
 - jdk（Java Development Kit），包含 JRE + java开发工具包
 - jre（java runtime environment）,包含 bin (JVM) + lib
@@ -121,7 +121,45 @@
   > **4、访问字段：** getDeclaredFields()  
   > **5、调用方法：** Method.invoke()  
 
+### 8. 自定义注解
 
+```
+public @interface Demo{
+}
+```
+
+- @Target：修饰范围
+
+  > **ElementType.class**
+  >
+  > - CONSTRUCTOR:用于描述构造器  
+  >   FIELD:用于描述域  
+  >   LOCAL_VARIABLE:用于描述局部变量  
+  >   METHOD:用于描述方法  
+  >   PACKAGE:用于描述包  
+  >   PARAMETER:用于描述参数  
+  >   TYPE:用于描述类、接口(包括注解类型) 或enum声明
+
+- @Retention: 生命周期
+
+  > **RetentionPoicy.class**
+  >
+  > - SOURCE：在源文件中有效（即源文件保留）  
+  >   CLASS：在class文件中有效（即class保留）  
+  >   RUNTIME：在运行时有效（即运行时保留）  
+
+- @Documented
+
+- @Inherited: 是否可用于继承
+
+- **允许的数据类型**
+
+  > - 基本类型（int,float,boolean,byte,double,char,long,short）
+  > - String  
+  > - Class
+  > - enum
+  > - Annotation
+  > - 上述类型的数组
 
 # 源码分析
 

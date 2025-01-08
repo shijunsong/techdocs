@@ -267,7 +267,11 @@
 
 #### 2.读写分离
 
+#### 3.集群方案
 
+- 原理：
+
+  
 
 ### 综合使用
 
@@ -324,6 +328,38 @@
 - 锁内容查询
 
   `select * from performance_schema.data_locks\G;`
+
+#### 3. Redis Mysql 同步方案
+
+- 方案1：通过中间件MQ
+
+- 方案2：Canal开源技术
+
+  - 原理: (**模仿MySQL主从复制**)
+
+    > canal模拟mysql slave的交互协议，伪装自己为mysql slave，向mysql master发送dump协议
+    > mysql master收到dump请求，开始推送binary log给slave（也就是canal）
+    > canal解析binary log对象（原始为byte流）
+    > 自己设计代码将store中的数据同步写入Redis
+
+  - [`参考：数据同步方案`](https://cloud.tencent.com/developer/article/1805755)
+
+- 方案3：**MySQL触发器+UDF函数实现**
+
+  - 实现原理
+
+    <img src="https://ask.qcloudimg.com/http-save/yehe-1651099/k18oryhej5.png" width="50%"/>
+
+  - 适用场景：读多写少，并且不存并发写的场景
+
+  - 缺点：MySQL触发器效率低，如果一个表经常被操作，特别损耗性能
+
+- 方案4：**解析MySQL的binlog实现，将数据库中的数据同步到Redis**
+
+  - 原理：基于mysql主从复制原理，解析binlog，然后同步到redis中
+  - 缺点：binlog存在Statement/Row/Mixedlevel多种形式，分析binlog实现同步的工作量极大
+
+
 
 ### 面试题
 
