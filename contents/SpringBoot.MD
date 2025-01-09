@@ -273,6 +273,108 @@ AOP （Aspect Oriented Programming，面向切面编程）
 
 ### 2. 原理
 
+#### @SpringBootApplication 注解分析
+
+- @SpringBootConfiguration 
+
+  - @Configuration：将当前类申明为配置类，同时还可以使用@bean注解将类以方法的形式实例化到容器
+
+- @EnableAutoConfiguration 
+
+  > 它主要就是通过内部的方法，
+  > 扫描classpath的META-INF/spring.factories配置文件（key-value），
+  > 将其中的 org.springframework.boot.autoconfigure.EnableAutoConfiguration 对应的配置项实例化并且注册到spring容器。
+
+  - @AutoConfigurationPackage 
+
+  - **@Import**(AutoConfigurationImportSelector.class)
+
+    > AutoConfigurationImportSelector.class
+    >
+    > - selectImports()
+    > - getAutoConfigurationEntry()
+    > - getCandidateConfigurations()
+    > - SpringFactoriesLoader.loadFactoryNames()
+
+- @ComponentScan：扫描当前包以及子包，将有@Component，@Controller，@Service，@Repository等注解的类注册到容器中，以便调用。
+
+#### SpringApplication.run()原理解析
+
+启动流程：
+
+> 1. 初始化监听器，以及添加到SpringApplication的自定义监听器。
+
+> 2. 发布ApplicationStartedEvent事件，如果想监听ApplicationStartedEvent事件，你可以这样定义：public class ApplicationStartedListener implements ApplicationListener，然后通过SpringApplication.addListener(..)添加进去即可。
+
+> 3. 装配参数和环境，确定是web环境还是非web环境。
+
+> 4. 装配完环境后，就触发ApplicationEnvironmentPreparedEvent事件。
+
+> 5. 如果SpringApplication的showBanner属性被设置为true，则打印启动的Banner。
+
+> 6. 创建ApplicationContext，会根据是否是web环境，来决定创建什么类型的ApplicationContext。
+
+> 7. 装配Context的环境变量，注册Initializers、beanNameGenerator等。
+
+> 8. 发布ApplicationPreparedEvent事件。
+
+> 9. 注册springApplicationArguments、springBootBanner，加载资源等
+
+> 10. 遍历调用所有SpringApplicationRunListener的contextLoaded()方法。
+
+> 11. 调用ApplicationContext的refresh()方法,装配context beanfactory等非常重要的核心组件。
+
+> 12. 查找当前ApplicationContext中是否注册有CommandLineRunner，如果有，则遍历执行它们。
+
+> 13. 发布ApplicationReadyEvent事件，启动完毕，表示服务已经可以开始正常提供服务了。通常我们这里会监听这个事件来打印一些监控性质的日志，表示应用正常启动了。
+
+#### 启动流程
+
+Spring Boot 的启动主要由 `SpringApplication.run()` 方法触发。这个方法内部做了很多事情，下面我们逐步分析：
+
+1. [**创建 SpringApplication 实例：**](https://medium.com/javarevisited/what-happens-internally-when-you-start-a-spring-boot-application-part1-a683a64c1be8)
+
+   - 首先会创建一个 SpringApplication 实例，这个实例会读取一些默认的属性，比如启动类、配置文件的位置等。
+
+2. **加载主类和配置：**
+
+   - 根据传入的启动类，加载主类上的注解（如 `@SpringBootApplication`），并解析配置信息。
+   - 加载 `META-INF/spring.factories` 文件，该文件定义了众多自动配置类。
+
+3. **创建 BeanFactory：**
+
+   - 创建一个 BeanFactory，它是 Spring 容器的核心，负责管理所有的 Bean。
+
+4. **注册 Bean：**
+
+   - 根据配置信息和自动配置类，注册各种 Bean 到 BeanFactory 中。
+
+5. **刷新上下文：**
+
+   - 调用 
+
+     ```
+     refresh()
+     ```
+
+      方法，完成 BeanFactory 的刷新，包括：
+
+     - 创建所有单例 Bean
+     - 执行 Bean 的初始化方法
+     - 发布容器刷新事件
+
+6. **启动 Web 容器：**
+
+   - 如果是 Web 应用，会启动内嵌的 Servlet 容器（如 Tomcat、Undertow），并注册 Servlet、Filter 等。
+
+7. **启动应用程序：**
+
+   - 应用程序正式启动，开始处理请求。
+
+
+
+
+
 #### 2.1 starter及使用
 
 #### 2.2 为什么只扫描核心启动类及其子包
