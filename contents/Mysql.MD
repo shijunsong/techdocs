@@ -100,7 +100,7 @@
 |      |        | 元数据锁        |      |      |                                                              |
 |      |        | AUTO-INC        |      |      |                                                              |
 |      | 行锁   | S / X           |      |      | `select id from where id = 1; (索引生效是行锁，否则表锁)`<br />`SELECT ... where id = '1' LOCK IN SHARE MODE;` |
-|      | 间隙锁 |                 |      |      | `SELECT ... where id = '1' for update;`<br />解析：update 过程中会加 **行锁和 间隙锁** 对索引前后上锁，防止插入数据<br />`select ... where id > 10;`<br />解析：id大于10为间隙锁范围，防止插入数据 |
+|      | 间隙锁 | 意向锁(`IX/IS`) |      |      | `SELECT ... where id = '1' for update;`<br />解析：update 过程中会加 **行锁和 间隙锁** 对索引前后上锁，防止插入数据<br />`select ... where id > 10;`<br />解析：id大于10为间隙锁范围，防止插入数据 |
 
 > 表锁：加锁前需要检查所有行无S 或 X Lock  
 > 意向锁：意义是**防止遍历**  
@@ -329,7 +329,7 @@
 
   `select * from performance_schema.data_locks\G;`
 
-#### 3. Redis Mysql 同步方案
+#### 3. Mysql  同步 Redis方案
 
 - 方案1：通过中间件MQ
 
@@ -366,6 +366,10 @@
 
   - 原理：基于mysql主从复制原理，解析binlog，然后同步到redis中
   - 缺点：binlog存在Statement/Row/Mixedlevel多种形式，分析binlog实现同步的工作量极大
+  
+- 方案5：双写策略
+
+  - 同时更新 Redis 和 MySQL，配合事务机制确保一致性。
 
 
 

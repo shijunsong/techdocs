@@ -265,23 +265,27 @@ AOP （Aspect Oriented Programming，面向切面编程）
 
 # SpringBoot
 
-### 特性
+### 1. 特性
 
-#### 1. starter及使用
-
-#### 2. 为什么只扫描核心启动类及其子包
-
-3启动过程如何完成自动装配
-
-内嵌tomcat 如何创建启动
-
-引入starter，springmvc如何完成自动装配
-
-### 原理
+#### 
 
 
 
-### 常用注解
+### 2. 原理
+
+#### 2.1 starter及使用
+
+#### 2.2 为什么只扫描核心启动类及其子包
+
+#### 2.3 启动过程如何完成自动装配
+
+#### 2.4 内嵌tomcat 如何创建启动(嵌入式Web容器)
+
+#### 2.5 引入starter，springmvc如何完成自动装配
+
+
+
+### 3. 常用注解
 
 - @SpringBootApplication
 - @SpringBootConfiguration
