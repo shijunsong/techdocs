@@ -54,6 +54,24 @@ https://www.cnblogs.com/liuqingzheng/p/11080501.html
 
 ### Kafka
 
+#### 1.保证可靠性
+
+Kafka Send 提供了三种不同的发送确认机制，以确保消息的可靠性。
+
+1. 同步发送（Synchronous Send）：Producer 会等待 Kafka 确认消息已经被成功写入到本地 Broker 之后才会继续执行后续操作。这种方式可以保证消息一定会被写入到 Kafka，但可能会降低吞吐量。
+2. 异步发送（Asynchronous Send）：Producer 不会等待 Kafka 的确认消息，而是直接返回一个发送结果。如果消息发送失败，Producer 可以根据返回的错误信息进行重试或者其他处理。这种方式可以提高吞吐量，但无法保证消息一定会被写入到 Kafka。
+3. 幂等性发送（Idempotent Send）：在幂等性发送模式下，Kafka 会为每个主题分配一个唯一的序列号，Producer 在发送消息时会包含这个序列号。如果消息已经被写入到 Kafka，那么 Kafka 会认为这是一个重复的消息，并忽略它。这种方式可以确保消息不会重复写入到 Kafka，但需要额外的逻辑来处理重复的消息。
+
+要确保 Kafka Send 的可靠性，建议采用以下策略：
+
+1. 使用同步发送或幂等性发送模式，以确保消息一定会被写入到 Kafka。
+2. 配置 Producer 的重试次数和重试间隔，以便在发送失败时能够自动重试。
+3. 使用幂等性生产者（Idempotent Producer），确保即使消息重复发送也不会导致数据不一致。
+4. 配置 Kafka 的副本因子（Replication Factor），以提高数据的可靠性和容错能力。
+5. 定期监控 Kafka 集群的健康状况和性能指标，及时发现并解决问题。
+
+2.
+
 ### RocketMQ
 
 ### Seata
