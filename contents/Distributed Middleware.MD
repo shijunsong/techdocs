@@ -125,9 +125,11 @@ https://www.cnblogs.com/liuqingzheng/p/11080501.html
 
 # 中间件
 
-### [Kafka](https://cloud.tencent.com/developer/article/1828222)
+### 消息队列
 
-#### 1. 集群架构
+#### [Kafka](https://cloud.tencent.com/developer/article/1828222)
+
+##### 1. 集群架构
 
 <img src="../pictures/middleware/kafka cluster.png" alt="img"/>
 
@@ -182,7 +184,7 @@ https://www.cnblogs.com/liuqingzheng/p/11080501.html
     > 原因：控制器所在broker挂掉 或者 zookeeper出现假死， 选举出新的控制器，被取代的控制器又恢复正常
     > 解决方案：controller_epoch持久节点，epoch number解决
 
-#### 2. [保证消息可靠性](https://cloud.tencent.com/developer/article/1589157)
+##### 2. [保证消息可靠性](https://cloud.tencent.com/developer/article/1589157)
 
 - **两个核心条件**：**1.** 必须是已提交的消息，**2.**N个Broker中至少有` 1 `个存活
 
@@ -206,12 +208,12 @@ https://www.cnblogs.com/liuqingzheng/p/11080501.html
   - 设置`replication.factor >= 3`（保存多份消息冗余）
   - 设置`min.insync.replicas > 1`（消息至少要被写入到多少个副本才算是“已提交”）
 
-#### 3. 提高吞吐量方式
+##### 3. 提高吞吐量方式
 
 - producer端使用异步发送，需要做好失败方案
 - 增加分区partition个数，提高并发量
 
-#### 4. 集群部署规划
+##### 4. 集群部署规划
 
 Zookeeper 节点和 Kafka 节点共用同一台物理机。
 
@@ -221,7 +223,7 @@ Zookeeper 节点和 Kafka 节点共用同一台物理机。
 | 192.168.1.7 | Kafka Broker，Zookeeper              |
 | 192.168.1.8 | Kafka Broker，Zookeeper              |
 
-#### 5. ack 机制
+##### 5. ack 机制
 
 在Kafka发送数据的时候，每次发送消息都会有一个确认反馈机制，确保消息正常被收到。
 
@@ -231,7 +233,14 @@ Zookeeper 节点和 Kafka 节点共用同一台物理机。
 > - `1`：服务端会等待 ack 值。leader 副本确认接收到消息后发送 ack 。如果 leader 挂掉后，不确保是否复制完成，也就是说新 leader 可能会丢失数据；
 > - `-1`：同样在 1 的基础上，服务端会等所有的 follower 的副本收到数据后， leader 才会发出 的 ack，这样数据就不会丢失。
 
-### RocketMQ
+#### RocketMQ
 
-### Seata
 
+
+### 分布式事务
+
+#### 2PC
+
+#### 3PC
+
+#### Seata
